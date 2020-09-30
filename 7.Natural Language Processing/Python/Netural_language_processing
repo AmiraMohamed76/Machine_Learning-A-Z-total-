@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 26 19:44:26 2020
+
+@author: amiramohaamed
+"""
+# Importing Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot  as plt
+
+# Importing Dataset
+dataset = pd.read_csv('Restaurant_Reviews.tsv', delimiter ='\t', quoting =3)
+""" Differnce between CSV ,TSV """
+""" CSV is Comma sparated values ---> delimeter ',' to sparate columns
+problem of this file ---> if there is ',' in a text not to sparate cols
+so we refer TSV is Tab sparated values ---> delimeter '\t' to sparate columns
+and this will not make problem with comma """
+
+# Cleaning The Texts for specific index
+"""import re
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+review = re.sub('[^a-zA-Z]', ' ', dataset['Review'][0])"""
+""" 1. importing re library to clean text
+    2. Using sub to delete characters that we don't need 
+    3. 1st parameter means remove all characters without upper or lower letter
+    4. 2nd parameter means replace this characters with space 
+    5. 3rd parameter means take first row to test """
+""" 1. importing nltk to download stopwords 
+    2. import stopwords and this is a list of words that we don't need it"""    
+#review = review.lower()
+""" lower used to make all letter in lower case """
+#review = review.split()
+""" we use split to convert review to list """
+#ps = PorterStemmer()
+#review = [ps.stem(word) for word in review if not word in set(stopwords.words('english'))]
+""" 1. make for loop to move on list of review 
+    2. if this word in stopwords list we will remove it """
+""" 1. stem function used to get source of words ex: loved converted to love"""    
+#review = ' '.join(review)    
+""" join used to convert again list to string and '' used to make space with words"""
+
+# Cleaning The Texts for whole dataset
+import re
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+corpus = []
+for i in range(0, 1000):
+    review = re.sub('[^a-zA-Z]', ' ', dataset['Review'][i])
+    review = review.lower()
+    review = review.split()
+    ps = PorterStemmer()
+    review = [ps.stem(word) for word in review if not word in set(stopwords.words('english'))]
+    review = ' '.join(review)  
+    corpus.append(review)
+    
+# Creating the bag of words model    
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(max_features = 1500) # make maxmium features 1500 instead of 1565
+X = cv.fit_transform(corpus).toarray()
+y = dataset.iloc[:, 1].values  # dependant variable
+""" 1. bag is a matrix that has all word from corpus each col has word 
+each row has if this word exist in this row (1) or not (0) in this matrix
+we note that each word must be unquie (not repeated)
+    2. we used this bag for rating the resturant """
+    
+# Splitting the dataset 
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X, y, test_size =0.20 ,random_state =0)
+
+
+# Fitting classifier to The Training set
+from sklearn.naive_bayes import GaussianNB
+classifier = GaussianNB()
+classifier.fit(X_train, y_train)
+
+# Predicting the test set result
+y_pred = classifier.predict(X_test)
+
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred) 

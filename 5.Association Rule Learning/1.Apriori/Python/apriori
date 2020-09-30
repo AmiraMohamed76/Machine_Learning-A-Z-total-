@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Sep 23 18:38:25 2020
+
+@author: amiramohamed
+"""
+# Apriori 
+
+# Importing Library 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Importing dataset
+dataset = pd.read_csv('Market_Basket_Optimisation.csv', header = None)
+transaction =[] # create list
+for i in range(0, 7501):
+    transaction.append([str(dataset.values[i, j]) for j in range(0, 20)])
+
+""" transaction.append that means add some data
+i in 1st for loop to move in row 
+j in 2nd for loop to move in col
+dataset.values to get value of index 
+str to get value in '' """
+
+# Training Apriori on dataset
+from apyori import apriori
+rules = apriori(transaction, min_support = 0.003, min_confidance = 0.2, min_lift =3, min_length = 2 )
+
+# Visualising The result
+results = list(rules)
